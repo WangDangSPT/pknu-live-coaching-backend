@@ -2,7 +2,7 @@ const {compilecode,lsdir} = require('../helpers/users')
 
 const getdir = async (req,res)=>{
     try{
-    const { id } = req.params
+    const id = req.query.id
     //user data path in linux server
     const path = `/userdata/${id}`
     let output = await lsdir(path)
@@ -15,7 +15,7 @@ const getdir = async (req,res)=>{
 
 const compile = async (req,res)=>{
     try{
-        const {id} = req.params
+        const id = req.query.id
         const path = `/userdata/${id}/source.c`
         let output = await compilecode(path)
         res.status(200).json({id: id,lang: 'c',stdout:output})

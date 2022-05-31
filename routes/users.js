@@ -1,5 +1,5 @@
 const express = require('express')
-const {getdir, compile} = require('../controllers/users')
+const {getdir, compile,readsrcfile} = require('../controllers/users')
 const router = express.Router()
 
 
@@ -11,6 +11,7 @@ router.get('/', function(req, res) {
 
 router.get('/dir',getdir)
 // router.post('/dir',)
+router.get('/srcfile',readsrcfile)
 router.get('/compile',compile)
 
 module.exports = router;

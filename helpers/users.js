@@ -1,4 +1,5 @@
 const {spawn,exec} = require('child_process')
+const {readFile} = require('fs')
 
 //spawn child process to read directory
 const lsdir = (path)=>{
@@ -29,7 +30,20 @@ function compilecode(path){
         })
     })
 }
+//reads source.c file 
+function readsrc(path){
+    return new Promise((resolve,reject)=>{
+        readFile(`${path}/source.c`,'utf-8',(err,data)=>{
+            if(err){
+                reject(err)
+                throw err
+            }
+            resolve(data)
+        })       
+    })
+}
 module.exports = {
     compilecode,
-    lsdir
+    lsdir,
+    readsrc
 }

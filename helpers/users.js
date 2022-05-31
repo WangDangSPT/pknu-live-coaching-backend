@@ -3,7 +3,7 @@ const {spawn,exec} = require('child_process')
 //spawn child process to read directory
 const lsdir = (path)=>{
     return new Promise((resolve,reject)=>{
-        exec(`${path}`,(err,stdout,stderr)=>{
+        exec(`ls ${path}`,(err,stdout,stderr)=>{
             if(err){
                 reject(err)
             }
@@ -14,11 +14,10 @@ const lsdir = (path)=>{
         })
     })
 }
-
 //spawn child process to exec code
 function compilecode(path){
     return new Promise((resolve,reject)=>{
-        const arg = `cd /userdata/${userid} && gcc -o output.out source.c && output.out`
+        const arg = `cd ${path} && gcc -o output.out source.c && output.out`
         let child = spawn(`${arg}`,{
             shell:true
         })

@@ -18,7 +18,7 @@ const lsdir = (path)=>{
 //spawn child process to exec code
 function compilecode(path){
     return new Promise((resolve,reject)=>{
-        const arg = `cd ${path} && gcc -o output.out source.c && output.out`
+        const arg = `cd ${path} && gcc -o output.out source.c && ./output.out`
         let child = spawn(`${arg}`,{
             shell:true
         })

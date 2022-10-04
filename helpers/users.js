@@ -15,21 +15,6 @@ const lsdir = (path)=>{
         })
     })
 }
-//spawn child process to exec code
-function compilecode(path){
-    return new Promise((resolve,reject)=>{
-        const arg = `cd ${path} && gcc -o output.out source.c && ./output.out`
-        let child = spawn(`${arg}`,{
-            shell:true
-        })
-        child.stderr.on('data',data=>{
-            reject(data.toString())
-        })
-        child.stdout.on('data',data=>{
-            resolve(data.toString())
-        })
-    })
-}
 //reads source.c file 
 function readsrc(path){
     return new Promise((resolve,reject)=>{
@@ -43,7 +28,6 @@ function readsrc(path){
     })
 }
 module.exports = {
-    compilecode,
     lsdir,
     readsrc
 }

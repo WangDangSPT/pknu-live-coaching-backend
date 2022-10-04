@@ -1,18 +1,23 @@
 const createError = require('http-errors');
 const express = require('express');
 const logger = require('morgan');
+const cors = require('cors');
+
 require('dotenv').config()
 
 const usersRouter = require('./routes/users');
+const { urlencoded } = require('express');
 
 const app = express();
 
-app.use(logger('tiny'));
+app.use(cors());
+app.use(logger('dev'));
+app.use(urlencoded({extended : true} ));
 //not using any POST handlers atm so we are not using the middleware below
 // parse incoming json data middleware
-//app.use(express.json());
+app.use(express.json());
 
-//app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 
 app.use('/users', usersRouter);
 

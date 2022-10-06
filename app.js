@@ -6,18 +6,21 @@ const cors = require('cors');
 require('dotenv').config()
 
 const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth')
 const { urlencoded } = require('express');
 
 const app = express();
 
 app.use(cors());
 app.use(logger('dev'));
+// parse incoming data encoded in applicaiton/x-www-form-urlencoded
 app.use(urlencoded({extended : true} ));
-//not using any POST handlers atm so we are not using the middleware below
 // parse incoming json data middleware
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: false }));
+
+app.use('/auth',authRouter);
 
 app.use('/users', usersRouter);
 

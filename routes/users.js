@@ -1,5 +1,6 @@
 const express = require('express')
-const {getdir, compile, register, getprojects,newproject} = require('../controllers/users')
+const {compile, getprojects,newproject} = require('../controllers/users')
+const {verifyToken} = require('../middleware/authjwt')
 const router = express.Router()
 
 
@@ -10,10 +11,9 @@ router.get('/', function(req, res) {
 });
 
 // router.post('/dir',)
-//router.get('/srcfile',readsrcfile)
-router.get('/compile',compile)
-router.get('/getprojects',getprojects)
-router.post('/newproject',newproject)
-router.post('/register',register)
+// router.get('/srcfile',readsrcfile)
+router.get('/compile',[verifyToken],compile)
+router.get('/getprojects',[verifyToken],getprojects)
+router.post('/newproject',[verifyToken],newproject)
 
 module.exports = router;

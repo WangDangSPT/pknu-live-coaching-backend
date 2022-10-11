@@ -1,29 +1,16 @@
 const res = require('express/lib/response')
 const {getsubmission,submitcode,lsdir,readsrc} = require('../helpers/users')
 const axios = require('axios')
-const SourceCode = require('../models/sourcecode')
+const {SourceCode} = require('../models/sourcecode')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
-const login = async (req,res)=>{
-    try {
-        const user = await User.find({
-            username: req.body.user_id
-        })
-        const token = jwt.sign({
-            username: user.username
-        },'secret123')
-        res.status(200).json({status: 'ok', user: token})
-    } catch (error) {
-        res.status(404).json({status: 'error', user: false})
-    }
-}
 const compile = async (req,res)=>{
     try{
-        const username = req.query.user_id
-        const documentid = req.query.project_id
+        const username = req.username
+        const documentid = req.query.projects
         // pull sourcecode from mongo
-        sourcecode = SourceCode.find({$and: [{_id: documentid},{user: username}]})
+        sourcecode = SourceCode.find({$and: [{_id: documentid},{user_owner: username}]})
         // submit sourcecode to judge0
         const optionSubmit = {
             method: 'POST',
@@ -71,52 +58,40 @@ const readsrcfile = async(req,res)=>{
     }
 }
 
-const register = async(req,res)=>{
-    try {
-        const user = new User({
-            username: req.body.user_id
-        })
-        const output = await user.save()
-        res.status(200).json(output)
-    } catch (error) {
-        console.error(error)
-        res.status(404).send({error: 'preexisting username'})
-    }
-}
-
 const getprojects = async(req,res)=>{
-    const token = req.headers['x-access-token']
-    try {
-        const decoded = jwt.verify(token,'secret123')
-        const username = decoded.username
-        const sourcecodelist = await SourceCode.find({user_owner: username})
-        res.status(200).json(sourcecodelist)
-    } catch (error) {
-        console.error(error)
-        res.status(404).send({error: 'project not found'})
-    }
+    
+    // gets the array of projects owned by this user
+    await User.find({username: req.username,_id: req._id}, {projects:1, _id: 0}).exec((err,projects)=>{
+        if(err){
+            console.error(err)
+            res.status(500).send({error: 'cant find this users projects'})
+            return
+        }
+        if(projects){
+            return res.status(200).json(projects)
+        }
+    })
+    
 }
 const newproject = async(req,res)=>{
-    const token = req.headers['x-access-token']
-    try {
-        const decoded = jwt.verify(token,'secret123')
-        const username = decode.username
-        const newprojectfile = await SourceCode.save({
-                title: req.body.title,
-                language_id: req.body.language_id,
-                user_owner: username
-        })
-        
-    } catch (error) {
-        
+    try{
+    const user = await User.find({_id: req._id, username: req.username})
+    const newproject = new SourceCode({
+        title: req.body.title,
+        language_id: req.body.language_id
+    })
+    await user.projects.push(newproject)
+    const output = await user.save()
+    res.status(200).send(output)
+    }catch(error){
+        console.error(error)
+        res.status(500).send({error: error})
     }
 }
 
 module.exports = {
-    login,
     compile,
     readsrcfile,
-    register,
     getprojects,
     newproject
 }

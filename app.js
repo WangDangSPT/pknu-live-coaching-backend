@@ -11,17 +11,15 @@ const { urlencoded } = require('express');
 
 const app = express();
 
-app.use(cors());
 app.use(logger('dev'));
-// parse incoming data encoded in applicaiton/x-www-form-urlencoded
-app.use(urlencoded({extended : true} ));
+// cross origin enabled
+app.use(cors());
 // parse incoming json data middleware
 app.use(express.json());
-
-app.use(express.urlencoded({ extended: false }));
+// parse incoming data encoded in applicaiton/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/auth',authRouter);
-
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

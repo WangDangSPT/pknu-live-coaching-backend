@@ -7,10 +7,9 @@ const jwt = require('jsonwebtoken')
 
 const compile = async (req,res)=>{
     try{
-        const username = req.username
-        const documentid = req.query.projects
-        // pull sourcecode from mongo
-        sourcecode = SourceCode.find({$and: [{_id: documentid},{user_owner: username}]})
+        // pull project from mongo
+        const user = User.find({_id: req._id,username: req.username})
+        const project = user.projects.id(req.query._id)
         // submit sourcecode to judge0
         const optionSubmit = {
             method: 'POST',
@@ -21,7 +20,10 @@ const compile = async (req,res)=>{
               'Content-Type': 'application/json',
               'Capstone-Auth-Token': process.env.JUDGEKEY
             },
-            data: sourcecode
+            data: {
+                source_code: project.source_code,
+                language_id: project.language_id
+            }
           };
         let token = await axios(optionSubmit)
         // submit token and recieve output
@@ -33,8 +35,7 @@ const compile = async (req,res)=>{
               'content-type': 'application/json',
               'Content-Type': 'application/json',
               'Capstone-Auth-Token': process.env.JUDGEKEY
-            },
-            data: sourcecode
+            }
           };
         let output = await axios(optionGet)
         res.status(200).json(output)

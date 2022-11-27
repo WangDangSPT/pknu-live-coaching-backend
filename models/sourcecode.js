@@ -11,14 +11,10 @@ const sourceCodeSchema = new Schema({
     },
     source_code: {
       type: String
-
     },
-    // user_owner: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
     
 }, {timestamps: true})
 
-const SourceCode = mongoose.model('SourceCode',sourceCodeSchema)
 module.exports = {
-    sourceCodeSchema,
-    SourceCode
+    sourceCodeSchema
 }

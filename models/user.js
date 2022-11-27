@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const {sourceCodeSchema} = require('./sourcecode')
+const {classroomSchema} = require('./classroom')
 
 // instead of child referencing, we embed the projects into the user model
 
@@ -19,7 +19,7 @@ const userSchema = new Schema({
         type: String,
         require: true
     },
-    projects: [sourceCodeSchema]
+    classroom:[classroomSchema]
 }, {timestamps: true})
 
 const User = mongoose.model('User',userSchema)

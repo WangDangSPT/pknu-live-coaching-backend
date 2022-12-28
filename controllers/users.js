@@ -46,18 +46,6 @@ const compile = async (req,res)=>{
     }
 
 }
-const readsrcfile = async(req,res)=>{
-    try {
-        const id = req.query.id
-        //user path in linux server
-        const path = `../userdata/${id}`
-        let output = await readsrc(path)
-        res.status(200).json({id: id, data: output})
-    } catch (error) {
-        console.error(error)
-        res.status(404).send(error)   
-    }
-}
 
 const getprojects = async(req,res)=>{
     

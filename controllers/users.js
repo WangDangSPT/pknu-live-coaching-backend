@@ -1,9 +1,11 @@
 const res = require('express/lib/response')
-const {getsubmission,submitcode,lsdir,readsrc} = require('../helpers/users')
 const axios = require('axios')
-const {SourceCode} = require('../models/sourcecode')
+const SourceCode = require('../models/sourcecode')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const ShareDB = require('sharedb')
+const backend = require('../bin/www')
+const uuid = require('uuid')
 
 const compile = async (req,res)=>{
     try{
@@ -46,41 +48,66 @@ const compile = async (req,res)=>{
     }
 
 }
-
-const getprojects = async(req,res)=>{
-    
-    // gets the array of projects owned by this user
-    await User.find({username: req.username,_id: req._id}, {projects:1, _id: 0}).exec((err,projects)=>{
-        if(err){
-            console.error(err)
-            res.status(500).send({error: 'cant find this users projects'})
-            return
-        }
-        if(projects){
-            return res.status(200).json(projects)
-        }
-    })
-    
-}
-const newproject = async(req,res)=>{
+const getAllClassrooms = async(req,res)=>{
+    // Classroom Dashboard
     try{
-    const user = await User.find({_id: req._id, username: req.username})
-    const newproject = new SourceCode({
-        title: req.body.title,
-        language_id: req.body.language_id
-    })
-    await user.projects.push(newproject)
-    const output = await user.save()
-    res.status(200).send(output)
-    }catch(error){
+        const user = await User.find({_id: req._id, username: req.username})
+        res.status(200).send(user.classroom)
+    } catch(error){
         console.error(error)
         res.status(500).send({error: error})
     }
 }
 
+const newClassroom = async()=>{
+    try{
+        const user = await User.find({_id: req._id, username: req.username})
+        await user.classrooms.push({title: req.classroomtitle})
+        const output = await user.save()
+        res.status(200).send(output)
+        }catch(error){
+            console.error(error)
+            res.status(500).send({error: error})
+        }
+}
+
+const getAllProjects = async(req,res)=>{
+    // recieves input of an array of project ids owned by a classroom and outputs an array of projects
+    // Project DashBoard
+    try{
+        const classroomProjects = req.projects
+        const output=[]
+        for(const projectid of classroomProjects){
+            const project = await SourceCode.find({_id: projectid})
+            output.push(project)
+        } 
+        res.status(200).send(output)
+    }catch(error){
+        console.error(error)
+        res.status(500).send({error: error})
+    }
+        
+}
+
+const newproject = async(req,res)=>{
+    // using ShareDB's API
+    // generate UUID
+    const connection = backend.connect()
+    const id = uuid.v5()
+    const doc = connection.get('sourcecode',id)
+    doc.fetch(function(err){
+        if(error)throw err;
+        if(doc.type === null){
+            doc.create({content: 'Hello World!',title: req.title ,lang:req.language_id})
+            return
+        }
+    })
+}
+
 module.exports = {
     compile,
-    readsrcfile,
-    getprojects,
-    newproject
+    getAllClassrooms,
+    newClassroom,
+    newproject,
+    getAllProjects
 }

@@ -3,19 +3,19 @@ const axios = require('axios')
 const SourceCode = require('../models/sourcecode')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
-const ShareDB = require('sharedb')
 const backend = require('../bin/www')
 const uuid = require('uuid')
+const mongoose = require('mongoose')
 
 const compile = async (req,res)=>{
     try{
         // pull project from mongo
-        const user = User.find({_id: req._id,username: req.username})
+        const user = User.find({_id: mongoose.Types.ObjectId(req.body._id)})
         const project = user.projects.id(req.query._id)
         // submit sourcecode to judge0
         const optionSubmit = {
             method: 'POST',
-            url: 'https://18.182.33.113:2358/submissions',
+            url: process.env.JUDGEURLSUB,
             params: {base64_encoded: 'true',wait: 'false', fields: '*'},
             headers: {
               'content-type': 'application/json',
@@ -31,7 +31,7 @@ const compile = async (req,res)=>{
         // submit token and recieve output
         const optionGet = {
             method: 'GET',
-            url: `https://18.182.33.113:2358/submissions/${token.token}`,
+            url: (process.env.JUDGEURLSUB).concat(token.token),
             params: {base64_encoded: 'true',wait: 'false', fields: '*'},
             headers: {
               'content-type': 'application/json',
@@ -51,7 +51,7 @@ const compile = async (req,res)=>{
 const getAllClassrooms = async(req,res)=>{
     // Classroom Dashboard
     try{
-        const user = await User.find({_id: req._id, username: req.username})
+        const user = await User.find({_id: mongoose.Types.ObjectId(req._id), username: req.username})
         res.status(200).send(user.classroom)
     } catch(error){
         console.error(error)
@@ -61,7 +61,7 @@ const getAllClassrooms = async(req,res)=>{
 
 const newClassroom = async()=>{
     try{
-        const user = await User.find({_id: req._id, username: req.username})
+        const user = await User.find({_id: mongoose.Types.ObjectId(req._id), username: req.username})
         await user.classrooms.push({title: req.classroomtitle})
         const output = await user.save()
         res.status(200).send(output)

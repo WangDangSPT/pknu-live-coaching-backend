@@ -10,7 +10,7 @@ router.get('/', function(req, res) {
   res.send('respond with a resource')
 });
 
-router.get('/compile',[verifyToken],compile)
+router.post('/compile',[verifyToken],compile)
 router.get('/getallprojects',[verifyToken],getAllProjects)
 router.post('/newproject',[verifyToken],newproject)
 router.post('/newclassroom',[verifyToken],newClassroom)

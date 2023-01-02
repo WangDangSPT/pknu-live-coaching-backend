@@ -11,6 +11,8 @@ const mongoose = require('mongoose')
 const ShareDB = require('sharedb')
 const WebSocket = require('ws')
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream')
+const admin = require('firebase-admin')
+const serviceAccount = require('../key/capstone-8c195-firebase-adminsdk-7btdw-d4a0f97e4b.json')
 
 const db = require('sharedb-mongo')(process.env.MONGO_URL)
 const backend = new ShareDB({db})
@@ -27,6 +29,7 @@ app.set('port', port);
 
 const server = http.createServer(app);
 initialize()
+initFirebaseAdmin()
 startWebsocket()
 
 server.listen(port)
@@ -49,6 +52,15 @@ const initialize = async() => {
 /**
  * Websocket Server to handle ShareDB subscription connections
  */
+function initFirebaseAdmin(){
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  })
+}
+
+/**
+ * Websocket Server to handle ShareDB subscription connections
+ */
 function startWebsocket(){
   const wss = new WebSocket.Server({server: server})
   wss.on('connection',function(ws){
@@ -56,6 +68,8 @@ function startWebsocket(){
     backend.listen(stream)
   })
 }
+
+
 /**
  * Normalize a port into a number, string, or false.
  */
@@ -116,4 +130,7 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-module.exports = backend
+module.exports = {
+  backend,
+  admin
+}

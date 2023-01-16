@@ -1,5 +1,6 @@
 const express = require('express')
-const {getdir, compile,readsrcfile, register, login, getprojects,newproject} = require('../controllers/users')
+const {compile, getAllProjects,newproject,getAllClassrooms,newClassroom} = require('../controllers/users')
+const {verifyToken} = require('../middleware/authjwt')
 const router = express.Router()
 
 
@@ -9,12 +10,10 @@ router.get('/', function(req, res) {
   res.send('respond with a resource')
 });
 
-// router.post('/dir',)
-//router.get('/srcfile',readsrcfile)
-router.get('/compile',compile)
-router.get('/getprojects',getprojects)
-router.post('/newproject',newproject)
-router.post('/register',register)
-router.post('/login',login)
+router.post('/compile',[verifyToken],compile)
+router.get('/getallprojects',[verifyToken],getAllProjects)
+router.post('/newproject',[verifyToken],newproject)
+router.post('/newclassroom',[verifyToken],newClassroom)
+router.get('/getallclassrooms',[verifyToken],getAllClassrooms)
 
 module.exports = router;

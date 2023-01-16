@@ -8,7 +8,14 @@ const app = require('../app');
 const debug = require('debug')('backend-api:server');
 const http = require('http');
 const mongoose = require('mongoose')
+const ShareDB = require('sharedb')
+const WebSocket = require('ws')
+const WebSocketJSONStream = require('@teamwork/websocket-json-stream')
+const admin = require('firebase-admin')
+const serviceAccount = require('../key/capstone-8c195-firebase-adminsdk-7btdw-d4a0f97e4b.json')
 
+const db = require('sharedb-mongo')(process.env.MONGO_URL)
+const backend = new ShareDB({db})
 /**
  * Get port from environment and store in Express.
  */
@@ -21,15 +28,47 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
+initialize()
+initFirebaseAdmin()
+startWebsocket()
+
+server.listen(port)
+server.on('listening',onListening)
 
 /**
  * Listen on provided port, on all network interfaces once server connects to DB.
  */
-mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true})
-  .then((result) => server.listen(port))
-  .catch((err)=> console.log(err))
-server.on('error', onError);
-server.on('listening', onListening);
+
+const initialize = async() => {
+  try{
+    // According to docs mongoose returns a promise 
+    await mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true})
+  }catch (err){
+    console.log(err)
+  }
+
+}
+
+/**
+ * Websocket Server to handle ShareDB subscription connections
+ */
+function initFirebaseAdmin(){
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  })
+}
+
+/**
+ * Websocket Server to handle ShareDB subscription connections
+ */
+function startWebsocket(){
+  const wss = new WebSocket.Server({server: server})
+  wss.on('connection',function(ws){
+    const stream = new WebSocketJSONStream(ws)
+    backend.listen(stream)
+  })
+}
+
 
 /**
  * Normalize a port into a number, string, or false.
@@ -89,4 +128,9 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+module.exports = {
+  backend,
+  admin
 }
